@@ -1,31 +1,23 @@
 import { useEffect, useState } from "react"
-import History from "../components/History"
-
+import { Link } from "react-router-dom"
+import MovieCard from "../components/MovieCard"
 
 export default function Home(){
-    const [search, setSearch] = useState()
-    const storedHistory = localStorage.getItem("search")
-    const [focused, setFocused] = useState(false)
+    const [mov, setMov] = useState([])
+    const [search, setSearch] = useState("James Bond")
 
-    const [history, setHistory] = useState(storedHistory ? JSON.parse(storedHistory) : [])
-
-    const baseUrl = `http://www.omdbapi.com/?s=${search}&apikey=`
+    const baseUrl = `http://www.omdbapi.com/?s=${search}&type=movie&apikey=`
     const apiKey = import.meta.env.VITE_APP_API_KEY
 
-    useEffect(()=>{
-        localStorage.setItem("search", JSON.stringify(history))
-    }, [history])
-
     const getMovies = async()=>{
-        try
-        {
+        // Fikk hjelp av Audun for å bruke denne til å tømme listen med filmer, da jeg hadde en film som hang igjen etter at jeg gjorde et nytt søk
+        setMov([])
+        try{
             const response = await fetch(`${baseUrl}${apiKey}`)
             const data = await response.json()
-
-            console.log(data)
-        }
-        catch(err){
-            console.error(err);
+            setMov(data.Search)
+        }catch(err){
+            console.error(err)
         }
     }
 
@@ -34,15 +26,17 @@ export default function Home(){
     }
 
     const handleSubmit = (e)=>{
-        // Forhindrer at siden refreshes når det gjøres et søk
         e.preventDefault()
-        // Søkefeltet tømmes etter at det er gjort et søk
-        e.target.reset()
-        
-        setHistory((prev) => [...prev, search])
-
+        getMovies()
     }
-    console.log(history)
+
+    // Fikk hjelp av Ole Bovolden til å lage denne useEffecten
+    useEffect(()=>{
+        if (search) {
+        getMovies()
+        }
+    }, [])
+    
 
     return (
     <main>
@@ -50,11 +44,18 @@ export default function Home(){
         <form onSubmit={handleSubmit}>
             <label>
                 Søk etter film
-                <input type="search" placeholder="Harry Potter" onChange={handleChange} onFocus={()=> setFocused(true)} /*onBlur={()=> setFocused(false)}*/></input>
+                <input 
+                minLength={3} type="search" placeholder="James Bond" onChange={handleChange}></input>
             </label>
-            {focused ? <History history={history} setSearch={setSearch} /> : null }
             <button onClick={getMovies}>Søk</button>
         </form>
+        <section>
+            {mov?.map((mov) => (
+            <Link key={mov.imdbID} to={`/${mov.Title}`}>
+                    <MovieCard mov={mov} />
+                </Link>
+            ))}
+        </section>
     </main>
     )
 }
