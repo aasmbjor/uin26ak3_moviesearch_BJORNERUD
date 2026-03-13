@@ -10,7 +10,7 @@ export default function Home(){
     const apiKey = import.meta.env.VITE_APP_API_KEY
 
     const getMovies = async()=>{
-        // Fikk hjelp av Audun for å bruke denne til å tømme listen med filmer, da jeg hadde en film som hang igjen etter at jeg gjorde et nytt søk
+        // Fikk hjelp av Audun Henden for å bruke denne til å tømme listen med filmer, da jeg hadde en film som hang igjen etter at jeg gjorde et nytt søk
         setMov([])
         try{
             const response = await fetch(`${baseUrl}${apiKey}`)
